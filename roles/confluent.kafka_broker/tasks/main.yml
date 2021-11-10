@@ -168,6 +168,44 @@
     group: "{{kafka_broker_group}}"
   notify: restart kafka
   when: not kafka_broker_secrets_protection_enabled|bool
+  diff: "{{ not mask_secrets|bool }}"
+
+- name: Create Kafka Broker Client Config with Secrets Protection
+  include_role:
+    name: confluent.common
+    tasks_from: secrets_protection.yml
+  vars:
+    final_properties: "{{ kafka_broker_client_properties }}"
+    encrypt_passwords: "{{ kafka_broker_client_secrets_protection_encrypt_passwords }}"
+    encrypt_properties: "{{ kafka_broker_client_secrets_protection_encrypt_properties }}"
+    config_path: "{{ kafka_broker.client_config_file}}"
+    secrets_file: "{{ kafka_broker_client_secrets_protection_file }}"
+    secrets_file_owner: "{{ kafka_broker_user }}"
+    secrets_file_group: "{{ kafka_broker_group }}"
+    handler: restart kafka
+  when: kafka_broker_client_secrets_protection_enabled|bool
+  no_log: "{{mask_secrets|bool}}"
+
+- name: Create Kafka Broker Client Config
+  template:
+    src: client.properties.j2
+    dest: "{{kafka_broker.client_config_file}}"
+    mode: 0640
+    owner: "{{kafka_broker_user}}"
+    group: "{{kafka_broker_group}}"
+  when: not kafka_broker_client_secrets_protection_enabled|bool
+  no_log: "{{mask_secrets|bool}}"
+
+# Zookeeper shell cannot read server.properties if secrets protection is enabled. Keeping a separate file.
+- name: Create Zookeeper TLS Client Config
+  template:
+    src: zookeeper-tls-client.properties.j2
+    dest: "{{kafka_broker.zookeeper_tls_client_config_file}}"
+    mode: 0640
+    owner: "{{kafka_broker_user}}"
+    group: "{{kafka_broker_group}}"
+  when: zookeeper_ssl_enabled|bool
+  no_log: "{{mask_secrets|bool}}"
 
 - name: Create Logs Directory
   file:
@@ -224,6 +262,7 @@
   loop: "{{ sasl_scram_users|dict2items }}"
   run_once: true
   when: "'SCRAM-SHA-512' in kafka_broker_sasl_enabled_mechanisms"
+  no_log: "{{mask_secrets|bool}}"
 
 - name: Deploy JMX Exporter Config File
   copy:
@@ -250,6 +289,7 @@
     owner: root
     group: root
   notify: restart kafka
+  diff: "{{ not mask_secrets|bool }}"
 
 - name: Tune virtual memory settings
   sysctl:

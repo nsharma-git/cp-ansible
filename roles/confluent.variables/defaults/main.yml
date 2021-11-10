@@ -7,6 +7,9 @@ confluent_full_package_version: "{{ confluent_package_version + '-1' }}"
 confluent_package_redhat_suffix: "{{ '-' + confluent_full_package_version if confluent_full_package_version != '' else ''}}"
 confluent_package_debian_suffix: "{{ '=' + confluent_full_package_version if confluent_full_package_version != '' else ''}}"
 
+### Boolean to mask secrets in playbook output
+mask_secrets: true
+
 ### To copy from Ansible control host or download
 jolokia_url_remote: true
 

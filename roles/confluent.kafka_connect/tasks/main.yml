@@ -122,6 +122,7 @@
     secrets_file_group: "{{ kafka_connect_group }}"
     handler: restart connect distributed
   when: kafka_connect_secrets_protection_enabled|bool
+  no_log: "{{ mask_secrets|bool }}"
 
 - name: Create Connect Distributed Config
   template:
@@ -132,6 +133,7 @@
     group: "{{kafka_connect_group}}"
   notify: restart connect distributed
   when: not kafka_connect_secrets_protection_enabled|bool
+  diff: "{{ not mask_secrets|bool }}"
 
 - name: Install Connect Plugins
   include_tasks: connect_plugins.yml
@@ -197,6 +199,7 @@
     owner: root
     group: root
   notify: restart connect distributed
+  diff: "{{ not mask_secrets|bool }}"
 
 - name: Certs were Updated - Trigger Restart
   command: /bin/true
