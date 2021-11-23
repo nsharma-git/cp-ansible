@@ -2,5 +2,6 @@
 *.retry
 *.pyc
 *.idea
+*.iml
 generated_ssl_files/
 *base-config.yml
