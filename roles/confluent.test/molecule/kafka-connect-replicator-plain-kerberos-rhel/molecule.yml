@@ -252,7 +252,7 @@ provisioner:
         mds_broker_listener:
           ssl_enabled: true
           ssl_mutual_auth_enabled: true
-          sasl_protocol: none
+          sasl_protocol: plain
 
         # Paths relative to all.yml
         ssl_ca_cert_filepath: "roles/confluent.test/molecule/{{scenario_name}}/generated_ssl_files/ca.crt"
@@ -289,6 +289,8 @@ provisioner:
           ssl_mutual_auth_enabled: false
           sasl_protocol: plain
 
+        kafka_connect_replicator_truststore_storepass: confluenttruststorepass
+        kafka_connect_replicator_keystore_storepass: confluentkeystorestorepass
         kafka_connect_replicator_consumer_bootstrap_servers: mds-kafka-broker1:9092
         kafka_connect_replicator_consumer_ssl_ca_cert_path: "roles/confluent.test/molecule/{{scenario_name}}/generated_ssl_files/ca.crt"
         kafka_connect_replicator_consumer_ssl_cert_path: "roles/confluent.test/molecule/{{scenario_name}}/generated_ssl_files/{{inventory_hostname}}-ca1-signed.crt"
