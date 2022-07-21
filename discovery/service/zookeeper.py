@@ -71,7 +71,7 @@ class ZookeeperServicePropertyBaseBuilder(AbstractPropertyBuilder):
         group = "zookeeper_custom_properties"
         skip_properties = set(FileUtils.get_zookeeper_configs("skip_properties"))
         self.build_custom_properties(inventory=self.inventory,
-                                     group= group,
+                                     group=group,
                                      skip_properties=skip_properties,
                                      mapped_properties=mapped_properties,
                                      service_properties=service_properties)
@@ -92,8 +92,9 @@ class ZookeeperServicePropertyBaseBuilder(AbstractPropertyBuilder):
     def _build_ssl_properties(self, service_properties: dict) -> tuple:
 
         property_dict = dict()
-        property_list = ["secureClientPort", "ssl.keyStore.location", "ssl.keyStore.password", "ssl.trustStore.location", "ssl.trustStore.password"]
-       
+        property_list = ["secureClientPort", "ssl.keyStore.location", "ssl.keyStore.password",
+                         "ssl.trustStore.location", "ssl.trustStore.password"]
+
         for property_key in property_list:
             self.mapped_service_properties.add(property_key)
 
@@ -119,6 +120,7 @@ class ZookeeperServicePropertyBaseBuilder(AbstractPropertyBuilder):
             return "zookeeper", {'ssl_mutual_auth_enabled': True}
 
         return "all", {}
+
 
 class ZookeeperServicePropertyBuilder60(ZookeeperServicePropertyBaseBuilder):
     pass

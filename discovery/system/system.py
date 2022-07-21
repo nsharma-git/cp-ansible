@@ -17,7 +17,7 @@ class SystemPropertyBuilder:
     inventory = None
     input_context = None
 
-    def __init__(self,  input_context: InputContext, inventory: CPInventoryManager):
+    def __init__(self, input_context: InputContext, inventory: CPInventoryManager):
         self.inventory = inventory
         self.input_context = input_context
 

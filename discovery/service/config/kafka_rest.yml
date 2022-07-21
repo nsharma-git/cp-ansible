@@ -32,3 +32,5 @@ skip_properties:
   - client.confluent.monitoring.interceptor.ssl.keystore.password
   - client.config.providers.securepass.class
   - basic.auth.credentials.source
+  - schema.registry.url
+

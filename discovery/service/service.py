@@ -136,7 +136,7 @@ class AbstractPropertyBuilder(ABC):
                                 group: str,
                                 service_properties: dict,
                                 skip_properties: set,
-                                mapped_properties:set):
+                                mapped_properties: set):
 
         custom_properties = dict()
 
@@ -196,4 +196,3 @@ class ServicePropertyBuilder:
 
     def with_replicator_properties(self):
         return self
-

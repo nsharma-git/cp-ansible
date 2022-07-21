@@ -107,8 +107,11 @@ class ControlCenterServicePropertyBaseBuilder(AbstractPropertyBuilder):
         if control_center_listener.find('https') < 0:
             return "all", {}
 
-        property_list = ["confluent.controlcenter.rest.ssl.truststore.location", "confluent.controlcenter.rest.ssl.truststore.password", "confluent.controlcenter.rest.ssl.keystore.location",
-                            "confluent.controlcenter.rest.ssl.keystore.password", "confluent.controlcenter.rest.ssl.key.password"]
+        property_list = ["confluent.controlcenter.rest.ssl.truststore.location",
+                         "confluent.controlcenter.rest.ssl.truststore.password",
+                         "confluent.controlcenter.rest.ssl.keystore.location",
+                         "confluent.controlcenter.rest.ssl.keystore.password",
+                         "confluent.controlcenter.rest.ssl.key.password"]
         for property_key in property_list:
             self.mapped_service_properties.add(property_key)
 
@@ -116,10 +119,13 @@ class ControlCenterServicePropertyBaseBuilder(AbstractPropertyBuilder):
         property_dict['ssl_enabled'] = True
         property_dict['ssl_provided_keystore_and_truststore'] = True
         property_dict['ssl_provided_keystore_and_truststore_remote_src'] = True
-        property_dict['ssl_truststore_filepath'] = service_prop.get('confluent.controlcenter.rest.ssl.truststore.location')
-        property_dict['ssl_truststore_password'] = service_prop.get('confluent.controlcenter.rest.ssl.truststore.password')
+        property_dict['ssl_truststore_filepath'] = service_prop.get(
+            'confluent.controlcenter.rest.ssl.truststore.location')
+        property_dict['ssl_truststore_password'] = service_prop.get(
+            'confluent.controlcenter.rest.ssl.truststore.password')
         property_dict['ssl_keystore_filepath'] = service_prop.get('confluent.controlcenter.rest.ssl.keystore.location')
-        property_dict['ssl_keystore_store_password'] = service_prop.get('confluent.controlcenter.rest.ssl.keystore.password')
+        property_dict['ssl_keystore_store_password'] = service_prop.get(
+            'confluent.controlcenter.rest.ssl.keystore.password')
         property_dict['ssl_keystore_key_password'] = service_prop.get('confluent.controlcenter.rest.ssl.key.password')
         property_dict['ssl_truststore_ca_cert_alias'] = ''
 
@@ -138,6 +144,7 @@ class ControlCenterServicePropertyBaseBuilder(AbstractPropertyBuilder):
         if 'ssl_mutual_auth_enabled' in inventory_data['kafka_broker']['vars']:
             return "control_center", {'ssl_mutual_auth_enabled': True}
         return 'all', {}
+
 
 class ControlCenterServicePropertyBuilder60(ControlCenterServicePropertyBaseBuilder):
     pass

@@ -33,7 +33,6 @@ class SchemaRegistryServicePropertyBaseBuilder(AbstractPropertyBuilder):
         # Get the hosts for given service
         service = ConfluentServices.SCHEMA_REGISTRY
         hosts = self.get_service_host(service, self.inventory)
-        logger.info(hosts)
         if not hosts:
             logger.error(f"Could not find any host with service {service.value.get('name')} ")
 
