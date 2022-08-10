@@ -77,23 +77,23 @@ class KafkaConnectServicePropertyBaseBuilder(AbstractPropertyBuilder):
     def __build_runtime_properties(self, service_properties: dict):
         pass
 
-    def _build_service_replication_factor(self, service_prop: dict)->tuple:
+    def _build_service_replication_factor(self, service_prop: dict) -> tuple:
         key = "config.storage.replication.factor"
         self.mapped_service_properties.add(key)
         return "all", {"kafka_connect_default_internal_replication_factor": int(service_prop.get(key))}
 
-    def _build_config_storage_topic(self, service_prop:dict)->tuple:
+    def _build_config_storage_topic(self, service_prop: dict) -> tuple:
         key = "config.storage.topic"
         self.mapped_service_properties.add(key)
         value = service_prop.get(key)
         return "all", {"kafka_connect_group_id": value.rstrip("-configs")}
 
-    def _build_monitoring_interceptor_propperty(self, service_prop:dict)->tuple:
+    def _build_monitoring_interceptor_propperty(self, service_prop: dict) -> tuple:
         key = "confluent.monitoring.interceptor.topic"
         self.mapped_service_properties.add(key)
-        return "all", { "kafka_connect_monitoring_interceptors_enabled": key in service_prop}
+        return "all", {"kafka_connect_monitoring_interceptors_enabled": key in service_prop}
 
-    def _build_connect_group_id(self, service_prop:dict)->tuple:
+    def _build_connect_group_id(self, service_prop: dict) -> tuple:
         key = "group.id"
         self.mapped_service_properties.add(key)
         return "all", {"kafka_connect_group_id": service_prop.get(key)}
@@ -108,7 +108,7 @@ class KafkaConnectServicePropertyBaseBuilder(AbstractPropertyBuilder):
             "kafka_connect_rest_port": parsed_uri.port
         }
 
-    def _build_advertised_protocol_port(self, service_prop:dict) -> tuple:
+    def _build_advertised_protocol_port(self, service_prop: dict) -> tuple:
         key1 = "rest.advertised.listener"
         self.mapped_service_properties.add(key1)
 
@@ -120,14 +120,15 @@ class KafkaConnectServicePropertyBaseBuilder(AbstractPropertyBuilder):
             "kafka_connect_rest_port": service_prop.get(key2)
         }
 
-    def _build_ssl_properties(self, service_properties:dict) -> tuple:
+    def _build_ssl_properties(self, service_properties: dict) -> tuple:
         key = 'rest.advertised.listener'
         kafka_connect_http_protocol = service_properties.get(key)
         if kafka_connect_http_protocol != 'https':
             return "all", {}
-        
-        property_list = ["listeners.https.ssl.keystore.location", "listeners.https.ssl.keystore.password", "listeners.https.ssl.key.password",
-                            "listeners.https.ssl.truststore.location", "listeners.https.ssl.truststore.password"]
+
+        property_list = ["listeners.https.ssl.keystore.location", "listeners.https.ssl.keystore.password",
+                         "listeners.https.ssl.key.password",
+                         "listeners.https.ssl.truststore.location", "listeners.https.ssl.truststore.password"]
 
         for property_key in property_list:
             self.mapped_service_properties.add(property_key)
@@ -143,16 +144,17 @@ class KafkaConnectServicePropertyBaseBuilder(AbstractPropertyBuilder):
         property_dict['ssl_truststore_filepath'] = service_properties.get('listeners.https.ssl.truststore.location')
         property_dict['ssl_truststore_password'] = service_properties.get('listeners.https.ssl.truststore.password')
         property_dict['ssl_truststore_ca_cert_alias'] = ''
-    
+
         return "kafka_connect", property_dict
 
-    def _build_mtls_property(self, service_properties:dict) -> tuple:
+    def _build_mtls_property(self, service_properties: dict) -> tuple:
         key = 'listeners.https.ssl.client.auth'
         self.mapped_service_properties.add(key)
         value = service_properties.get(key)
         if value is not None and value == 'required':
             return "kafka_connect", {'ssl_mutual_auth_enabled': True}
         return "all", {}
+
 
 class KafkaConnectServicePropertyBuilder60(KafkaConnectServicePropertyBaseBuilder):
     pass

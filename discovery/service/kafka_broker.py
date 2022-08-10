@@ -138,16 +138,17 @@ class KafkaServicePropertyBaseBuilder(AbstractPropertyBuilder):
 
         listeners = service_prop.get(key).split(",")
         for listener in listeners:
-            token = listener.split(":")
-            name = token[0]
-            port = token[-1]
+            from urllib.parse import urlparse
+            parsed_uri = urlparse(listener)
+            name = parsed_uri.scheme
+            port = parsed_uri.port
 
-            key = f"listener.name.{name.lower()}.sasl.enabled.mechanisms"
+            key = f"listener.name.{name}.sasl.enabled.mechanisms"
             self.mapped_service_properties.add(key)
 
             sasl_protocol = service_prop.get(key)
-            default_listeners[name.lower()] = {
-                "name": name,
+            default_listeners[name] = {
+                "name": name.upper(),
                 "port": port,
                 "sasl_protocol": sasl_protocol
             }
