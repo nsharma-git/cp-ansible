@@ -87,10 +87,10 @@ class KafkaRestServicePropertyBaseBuilder(AbstractPropertyBuilder):
             "kafka_rest_port": parsed_uri.port
         }
 
-    def _build_monitoring_interceptor_propperty(self, service_prop:dict)->tuple:
+    def _build_monitoring_interceptor_propperty(self, service_prop: dict) -> tuple:
         key = "confluent.monitoring.interceptor.topic"
         self.mapped_service_properties.add(key)
-        return "all", { "kakfa_rest_monitoring_interceptors_enabled": key in service_prop}
+        return "all", {"kakfa_rest_monitoring_interceptors_enabled": key in service_prop}
 
     def _build_tls_properties(self, service_prop: dict) -> tuple:
         key = "listeners"
@@ -100,7 +100,7 @@ class KafkaRestServicePropertyBaseBuilder(AbstractPropertyBuilder):
             return "all", {}
 
         property_list = ["ssl.keystore.location", "ssl.keystore.password", "ssl.key.password",
-                            "ssl.truststore.location", "ssl.truststore.password"]
+                         "ssl.truststore.location", "ssl.truststore.password"]
         for property_key in property_list:
             self.mapped_service_properties.add(property_key)
 
@@ -142,6 +142,7 @@ class KafkaRestServicePropertyBaseBuilder(AbstractPropertyBuilder):
         if value is not None and value == 'securepass':
             return "all", {'kafka_rest_secrets_protection_enabled': True}
         return "all", {}
+
 
 class KafkaRestServicePropertyBuilder60(KafkaRestServicePropertyBaseBuilder):
     pass

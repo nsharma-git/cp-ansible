@@ -156,6 +156,7 @@ class KsqlServicePropertyBaseBuilder(AbstractPropertyBuilder):
             return "all", {'ksql_log_streaming_enabled': True}
         return "all", {}
 
+
 class KsqlServicePropertyBuilder60(KsqlServicePropertyBaseBuilder):
     pass
 

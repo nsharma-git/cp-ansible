@@ -52,7 +52,7 @@ skip_properties:
   - listener.name.internal.ssl.keystore.location  
   - listener.name.internal.ssl.keystore.password  
   - listener.name.internal.ssl.truststore.location  
-  - listener.name.internal.ssl.truststore.password  
+  - listener.name.internal.ssl.truststore.password
   - confluent.ssl.keymanager.algorithm
   - confluent.ssl.trustmanager.algorithm
   - confluent.ssl.keystore.type

@@ -147,17 +147,22 @@ class KafkaServicePropertyBaseBuilder(AbstractPropertyBuilder):
             self.mapped_service_properties.add(key)
 
             sasl_protocol = service_prop.get(key)
-            default_listeners[name] = {
-                "name": name.upper(),
-                "port": port,
-                "sasl_protocol": sasl_protocol
-            }
-
-            # Add the users to corresponding sasl mechanism
-            key = f"listener.name.{name.lower()}.{sasl_protocol.lower()}.sasl.jaas.config"
-            _dict = locals()[f"default_{sasl_protocol.lower()}_users"]
-            _dict.update(self.__get_user_dict(service_prop, key))
-            self.mapped_service_properties.add(key)
+            if sasl_protocol is None:
+                default_listeners[name] = {
+                    "name": name.upper(),
+                    "port": port
+                }
+            else:
+                default_listeners[name] = {
+                    "name": name.upper(),
+                    "port": port,
+                    "sasl_protocol": sasl_protocol
+                }
+                # Add the users to corresponding sasl mechanism
+                key = f"listener.name.{name.lower()}.{sasl_protocol.lower()}.sasl.jaas.config"
+                _dict = locals()[f"default_{sasl_protocol.lower()}_users"]
+                _dict.update(self.__get_user_dict(service_prop, key))
+                self.mapped_service_properties.add(key)
 
         return 'all', {
             "kafka_broker_default_listeners": default_listeners,
@@ -220,7 +225,6 @@ class KafkaServicePropertyBaseBuilder(AbstractPropertyBuilder):
         zookeeper_ssl_enabled = service_properties.get(key)
         if zookeeper_ssl_enabled != 'true':
             return "all", {}
-
         key1 = "zookeeper.ssl.truststore.location"
         key2 = "zookeeper.ssl.truststore.password"
         self.mapped_service_properties.add(key1)

@@ -70,7 +70,7 @@ class SchemaRegistryServicePropertyBaseBuilder(AbstractPropertyBuilder):
         group = "schema_registry_custom_properties"
         skip_properties = set(FileUtils.get_schema_registry_configs("skip_properties"))
         self.build_custom_properties(inventory=self.inventory,
-                                     group= group,
+                                     group=group,
                                      skip_properties=skip_properties,
                                      mapped_properties=mapped_properties,
                                      service_properties=service_properties)
@@ -87,15 +87,15 @@ class SchemaRegistryServicePropertyBaseBuilder(AbstractPropertyBuilder):
         self.mapped_service_properties.add("security.protocol")
         is_ssl = bool(f"{protocol == 'https'}")
 
-        ssl_props["ssl_enabled"] =  is_ssl
+        ssl_props["ssl_enabled"] = is_ssl
         if is_ssl == False:
             return "all", {}
 
         property_list = ["ssl.truststore.location", "ssl.truststore.password", "ssl.keystore.location",
-                            "ssl.keystore.password", "ssl.key.password"]
+                         "ssl.keystore.password", "ssl.key.password"]
         for property_key in property_list:
             self.mapped_service_properties.add(property_key)
-            
+
         ssl_props['ssl_provided_keystore_and_truststore'] = True
         ssl_props['ssl_provided_keystore_and_truststore_remote_src'] = True
 
