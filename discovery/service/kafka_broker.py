@@ -126,50 +126,50 @@ class KafkaServicePropertyBaseBuilder(AbstractPropertyBuilder):
 
         return "all", property_dict
 
-    def _build_default_listeners(self, service_prop: dict) -> tuple:
+    # def _build_default_listeners(self, service_prop: dict) -> tuple:
 
-        default_listeners = dict()
-        default_scram_users = dict()
-        default_scram256_users = dict()
-        default_plain_users = dict()
+    #     default_listeners = dict()
+    #     default_scram_users = dict()
+    #     default_scram256_users = dict()
+    #     default_plain_users = dict()
 
-        key = "listeners"
-        self.mapped_service_properties.add(key)
+    #     key = "listeners"
+    #     self.mapped_service_properties.add(key)
 
-        listeners = service_prop.get(key).split(",")
-        for listener in listeners:
-            from urllib.parse import urlparse
-            parsed_uri = urlparse(listener)
-            name = parsed_uri.scheme
-            port = parsed_uri.port
+    #     listeners = service_prop.get(key).split(",")
+    #     for listener in listeners:
+    #         from urllib.parse import urlparse
+    #         parsed_uri = urlparse(listener)
+    #         name = parsed_uri.scheme
+    #         port = parsed_uri.port
 
-            key = f"listener.name.{name}.sasl.enabled.mechanisms"
-            self.mapped_service_properties.add(key)
+    #         key = f"listener.name.{name}.sasl.enabled.mechanisms"
+    #         self.mapped_service_properties.add(key)
 
-            sasl_protocol = service_prop.get(key)
-            if sasl_protocol is None:
-                default_listeners[name] = {
-                    "name": name.upper(),
-                    "port": port
-                }
-            else:
-                default_listeners[name] = {
-                    "name": name.upper(),
-                    "port": port,
-                    "sasl_protocol": sasl_protocol
-                }
-                # Add the users to corresponding sasl mechanism
-                key = f"listener.name.{name.lower()}.{sasl_protocol.lower()}.sasl.jaas.config"
-                _dict = locals()[f"default_{sasl_protocol.lower()}_users"]
-                _dict.update(self.__get_user_dict(service_prop, key))
-                self.mapped_service_properties.add(key)
+    #         sasl_protocol = service_prop.get(key)
+    #         if sasl_protocol is None:
+    #             default_listeners[name] = {
+    #                 "name": name.upper(),
+    #                 "port": port
+    #             }
+    #         else:
+    #             default_listeners[name] = {
+    #                 "name": name.upper(),
+    #                 "port": port,
+    #                 "sasl_protocol": sasl_protocol
+    #             }
+    #             # Add the users to corresponding sasl mechanism
+    #             key = f"listener.name.{name.lower()}.{sasl_protocol.lower()}.sasl.jaas.config"
+    #             _dict = locals()[f"default_{sasl_protocol.lower()}_users"]
+    #             _dict.update(self.__get_user_dict(service_prop, key))
+    #             self.mapped_service_properties.add(key)
 
-        return 'all', {
-            "kafka_broker_default_listeners": default_listeners,
-            "sasl_scram_users": default_scram_users,
-            "sasl_scram256_users": default_scram256_users,
-            "sasl_plain_users": default_plain_users
-        }
+    #     return 'all', {
+    #         "kafka_broker_default_listeners": default_listeners,
+    #         "sasl_scram_users": default_scram_users,
+    #         "sasl_scram256_users": default_scram256_users,
+    #         "sasl_plain_users": default_plain_users
+    #     }
 
     def _build_inter_broker_listener_name(self, service_prop: dict) -> tuple:
         key = "inter.broker.listener.name"
