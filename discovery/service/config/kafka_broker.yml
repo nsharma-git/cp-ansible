@@ -51,12 +51,8 @@ skip_properties:
   - listener.name.internal.ssl.key.password 
   - listener.name.internal.ssl.keystore.location  
   - listener.name.internal.ssl.keystore.password  
-  - listener.name.internal.ssl.truststore.location  
-<<<<<<< HEAD
+  - listener.name.internal.ssl.truststore.location
   - listener.name.internal.ssl.truststore.password
-=======
-  - listener.name.internal.ssl.truststore.password  
->>>>>>> 52a03753 (Build rest proxy and fips properties)
   - confluent.ssl.keymanager.algorithm
   - confluent.ssl.trustmanager.algorithm
   - confluent.ssl.keystore.type

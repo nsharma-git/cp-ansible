@@ -80,4 +80,3 @@ skip_properties:
   - config.providers.secret.param.kafkastore.ssl.keystore.password
   - config.providers.secret.param.kafkastore.ssl.truststore.location
   - config.providers.secret.param.kafkastore.ssl.truststore.password
-
