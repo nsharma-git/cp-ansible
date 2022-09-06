@@ -216,16 +216,13 @@ class KafkaServicePropertyBaseBuilder(AbstractPropertyBuilder):
     def _build_fips_properties(self, service_properties: dict) -> tuple:
         key = 'enable.fips'
         self.mapped_service_properties.add(key)
-        fips_enabled = service_properties.get(key)
-        if fips_enabled == 'true':
-            return "all", {'fips_enabled': True}
-        return "all", {}
+        return "all", {'fips_enabled': bool(service_properties.get(key, False))}
 
     def _build_default_listeners(self, service_prop: dict) -> tuple:
-
         default_listeners = dict()
         default_scram_users = dict()
         default_scram256_users = dict()
+        default_scram_sha_512_users = dict()
         default_plain_users = dict()
 
         key = "listeners"
@@ -252,8 +249,7 @@ class KafkaServicePropertyBaseBuilder(AbstractPropertyBuilder):
             if ssl_enabled is not None:
                 default_listeners[name]['ssl_enabled'] = 'true'
 
-            inventory_data = self.inventory.get_inventory_data()
-            if 'ssl_mutual_auth_enabled' in inventory_data['kafka_broker']['vars']:
+            if 'ssl_mutual_auth_enabled' in self.inventory.groups.get('kafka_broker').vars:
                 default_listeners[name]['ssl_mutual_auth_enabled'] = 'true'
 
             sasl_protocol = service_prop.get(key1)
@@ -261,7 +257,7 @@ class KafkaServicePropertyBaseBuilder(AbstractPropertyBuilder):
                 default_listeners[name]['sasl_protocol']: sasl_protocol
                 # Add the users to corresponding sasl mechanism
                 key = f"listener.name.{name.lower()}.{sasl_protocol.lower()}.sasl.jaas.config"
-                _dict = locals()[f"default_{sasl_protocol.lower()}_users"]
+                _dict = locals()[f"default_{sasl_protocol.lower().replace('-', '_')}_users"]
                 _dict.update(self.__get_user_dict(service_prop, key))
                 self.mapped_service_properties.add(key)
 
@@ -269,6 +265,7 @@ class KafkaServicePropertyBaseBuilder(AbstractPropertyBuilder):
             "kafka_broker_default_listeners": default_listeners,
             "sasl_scram_users": default_scram_users,
             "sasl_scram256_users": default_scram256_users,
+            "sasl_scram512_users": default_scram_sha_512_users,
             "sasl_plain_users": default_plain_users
         }
 
