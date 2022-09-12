@@ -33,3 +33,11 @@ skip_properties:
   - client.config.providers.securepass.class
   - basic.auth.credentials.source
   - schema.registry.url
+  - rest.servlet.initializor.classes
+  - confluent.metadata.http.auth.credentials.provider
+  - ssl.truststore.location
+  - ssl.truststore.password
+  - confluent.metadata.ssl.truststore.location
+  - confluent.metadata.ssl.truststore.password
+  - confluent.metadata.ssl.endpoint.identification.algorithm
+
