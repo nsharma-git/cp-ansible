@@ -28,23 +28,23 @@ class KsqlServicePropertyBaseBuilder(AbstractPropertyBuilder):
         self.inventory = inventory
         self.input_context = input_context
         self.mapped_service_properties = set()
+        self.service = ConfluentServices.KSQL
 
     def build_properties(self):
 
         # Get the hosts for given service
-        service = ConfluentServices.KSQL
-        hosts = self.get_service_host(service, self.inventory)
+        hosts = self.get_service_host(self.service, self.inventory)
         self.hosts = hosts
 
         if not hosts:
-            logger.error(f"Could not find any host with service {service.value.get('name')} ")
+            logger.error(f"Could not find any host with service {self.service.value.get('name')} ")
             return
 
-        host_service_properties = self.get_property_mappings(self.input_context, service, hosts)
+        host_service_properties = self.get_property_mappings(self.input_context, self.service, hosts)
         service_properties = host_service_properties.get(hosts[0]).get(DEFAULT_KEY)
 
         # Build service user group properties
-        self.__build_daemon_properties(self.input_context, service, hosts)
+        self.__build_daemon_properties(self.input_context, self.service, hosts)
 
         # Build service properties
         self.__build_service_properties(service_properties)
@@ -53,7 +53,7 @@ class KsqlServicePropertyBaseBuilder(AbstractPropertyBuilder):
         self.__build_custom_properties(service_properties, self.mapped_service_properties)
 
         # Build Command line properties
-        self.__build_runtime_properties(service_properties)
+        self.__build_runtime_properties(hosts)
 
     def __build_daemon_properties(self, input_context: InputContext, service: ConfluentServices, hosts: list):
 
@@ -79,8 +79,10 @@ class KsqlServicePropertyBaseBuilder(AbstractPropertyBuilder):
                                      mapped_properties=mapped_properties,
                                      service_properties=service_properties)
 
-    def __build_runtime_properties(self, service_properties: dict):
-        pass
+    def __build_runtime_properties(self, hosts: list):
+        # Build Java runtime overrides
+        data = ('all', {'ksql_custom_java_args': self.get_jvm_arguments(self.input_context, self.service, hosts)})
+        self.update_inventory(self.inventory, data)
 
     def _build_service_id(self, service_prop: dict) -> tuple:
         key = "ksql.service.id"
@@ -106,7 +108,7 @@ class KsqlServicePropertyBaseBuilder(AbstractPropertyBuilder):
         self.mapped_service_properties.add(key2)
         return "all", {"ksql_default_internal_replication_factor": int(service_prop.get(key1))}
 
-    def _build_monitoring_interceptor_propperty(self, service_prop: dict) -> tuple:
+    def _build_monitoring_interceptor_property(self, service_prop: dict) -> tuple:
         key = "confluent.monitoring.interceptor.topic"
         self.mapped_service_properties.add(key)
         return "all", {"ksql_monitoring_interceptors_enabled": key in service_prop}
@@ -135,13 +137,13 @@ class KsqlServicePropertyBaseBuilder(AbstractPropertyBuilder):
         property_dict['ssl_truststore_ca_cert_alias'] = ''
 
         keystore_aliases = self.get_keystore_alias_names(input_context=self.input_context,
-                                                keystorepass=property_dict['ssl_keystore_store_password'],
-                                                keystorepath=property_dict['ssl_keystore_filepath'],
-                                                hosts=self.hosts)
+                                                         keystorepass=property_dict['ssl_keystore_store_password'],
+                                                         keystorepath=property_dict['ssl_keystore_filepath'],
+                                                         hosts=self.hosts)
         truststore_aliases = self.get_keystore_alias_names(input_context=self.input_context,
-                                        keystorepass=property_dict['ssl_truststore_password'],
-                                        keystorepath=property_dict['ssl_truststore_filepath'],
-                                        hosts=self.hosts)
+                                                           keystorepass=property_dict['ssl_truststore_password'],
+                                                           keystorepath=property_dict['ssl_truststore_filepath'],
+                                                           hosts=self.hosts)
         if keystore_aliases:
             # Set the first alias name
             property_dict["ssl_keystore_alias"] = keystore_aliases[0]
@@ -173,7 +175,7 @@ class KsqlServicePropertyBaseBuilder(AbstractPropertyBuilder):
         if value is not None and value == 'true':
             return "all", {'ksql_log_streaming_enabled': True}
         return "all", {}
-    
+
     def _build_rbac_properties(self, service_prop: dict) -> tuple:
         key1 = 'ksql.security.extension.class'
         if service_prop.get(key1) is None:
