@@ -9,14 +9,15 @@ logger = Logger.get_logger()
 
 class_name = ""
 
+
 class KafkaConnectServicePropertyBuilder:
 
     @staticmethod
     def build_properties(input_context: InputContext, inventory: CPInventoryManager):
         from discovery.service import get_service_builder_class
         builder_class = get_service_builder_class(modules=sys.modules[__name__],
-                                        default_class_name="KafkaConnectServicePropertyBaseBuilder",
-                                        version=input_context.from_version)
+                                                  default_class_name="KafkaConnectServicePropertyBaseBuilder",
+                                                  version=input_context.from_version)
         global class_name
         class_name = builder_class
         builder_class(input_context, inventory).build_properties()
@@ -32,6 +33,7 @@ class KafkaConnectServicePropertyBaseBuilder(AbstractPropertyBuilder):
         self.input_context = input_context
         self.mapped_service_properties = set()
         self.service = ConfluentServices.KAFKA_CONNECT
+        self.group = self.service.value.get('group')
 
     def build_properties(self):
 
@@ -83,40 +85,40 @@ class KafkaConnectServicePropertyBaseBuilder(AbstractPropertyBuilder):
                                      host_service_properties=_host_service_properties, skip_properties=skip_properties,
                                      mapped_properties=mapped_properties)
 
-
     def __build_runtime_properties(self, hosts: list):
         # Build Java runtime overrides
         data = (
-        'all', {'kafka_connect_custom_java_args': self.get_jvm_arguments(self.input_context, self.service, hosts)})
+            self.group,
+            {'kafka_connect_custom_java_args': self.get_jvm_arguments(self.input_context, self.service, hosts)})
         self.update_inventory(self.inventory, data)
 
     def _build_service_replication_factor(self, service_prop: dict) -> tuple:
         key = "config.storage.replication.factor"
         self.mapped_service_properties.add(key)
-        return "all", {"kafka_connect_default_internal_replication_factor": int(service_prop.get(key))}
+        return self.group, {"kafka_connect_default_internal_replication_factor": int(service_prop.get(key))}
 
     def _build_config_storage_topic(self, service_prop: dict) -> tuple:
         key = "config.storage.topic"
         self.mapped_service_properties.add(key)
         value = service_prop.get(key)
-        return "all", {"kafka_connect_group_id": value.rstrip("-configs")}
+        return self.group, {"kafka_connect_group_id": value.rstrip("-configs")}
 
     def _build_monitoring_interceptor_propperty(self, service_prop: dict) -> tuple:
         key = "confluent.monitoring.interceptor.topic"
         self.mapped_service_properties.add(key)
-        return "all", {"kafka_connect_monitoring_interceptors_enabled": key in service_prop}
+        return self.group, {"kafka_connect_monitoring_interceptors_enabled": key in service_prop}
 
     def _build_connect_group_id(self, service_prop: dict) -> tuple:
         key = "group.id"
         self.mapped_service_properties.add(key)
-        return "all", {"kafka_connect_group_id": service_prop.get(key)}
+        return self.group, {"kafka_connect_group_id": service_prop.get(key)}
 
     def _build_service_protocol_port(self, service_prop: dict) -> tuple:
         key = "listeners"
         self.mapped_service_properties.add(key)
         from urllib.parse import urlparse
         parsed_uri = urlparse(service_prop.get(key))
-        return "all", {
+        return self.group, {
             "kafka_connect_http_protocol": parsed_uri.scheme,
             "kafka_connect_rest_port": parsed_uri.port
         }
@@ -128,7 +130,7 @@ class KafkaConnectServicePropertyBaseBuilder(AbstractPropertyBuilder):
         key2 = "rest.advertised.port"
         self.mapped_service_properties.add(key2)
 
-        return "all", {
+        return self.group, {
             "kafka_connect_http_protocol": service_prop.get(key1),
             "kafka_connect_rest_port": int(service_prop.get(key2))
         }
@@ -137,7 +139,7 @@ class KafkaConnectServicePropertyBaseBuilder(AbstractPropertyBuilder):
         key = 'rest.advertised.listener'
         kafka_connect_http_protocol = service_properties.get(key)
         if kafka_connect_http_protocol != 'https':
-            return "all", {}
+            return self.group, {}
 
         property_list = ["listeners.https.ssl.keystore.location", "listeners.https.ssl.keystore.password",
                          "listeners.https.ssl.key.password",
@@ -154,7 +156,8 @@ class KafkaConnectServicePropertyBaseBuilder(AbstractPropertyBuilder):
         property_dict['kafka_connect_keystore_path'] = service_properties.get('listeners.https.ssl.keystore.location')
         property_dict['ssl_keystore_store_password'] = service_properties.get('listeners.https.ssl.keystore.password')
         property_dict['ssl_keystore_key_password'] = service_properties.get('listeners.https.ssl.key.password')
-        property_dict['kafka_connect_truststore_path'] = service_properties.get('listeners.https.ssl.truststore.location')
+        property_dict['kafka_connect_truststore_path'] = service_properties.get(
+            'listeners.https.ssl.truststore.location')
         property_dict['ssl_truststore_password'] = service_properties.get('listeners.https.ssl.truststore.password')
         property_dict['ssl_truststore_ca_cert_alias'] = ''
 
@@ -180,7 +183,7 @@ class KafkaConnectServicePropertyBaseBuilder(AbstractPropertyBuilder):
         value = service_properties.get(key)
         if value is not None and value == 'required':
             return "kafka_connect", {'ssl_mutual_auth_enabled': True}
-        return "all", {}
+        return self.group, {}
 
     def _build_rbac_properties(self, service_prop: dict) -> tuple:
         key1 = 'rest.servlet.initializor.classes'
@@ -204,12 +207,12 @@ class KafkaConnectServicePropertyBaseBuilder(AbstractPropertyBuilder):
             metadata_user_info = service_prop.get(key)
             property_dict['kafka_connect_ldap_user'] = metadata_user_info.split(':')[0]
             property_dict['kafka_connect_ldap_password'] = metadata_user_info.split(':')[1]
-        return 'all', property_dict
+        return self.group, property_dict
 
     def _build_secret_registry_properties(self, service_prop: dict) -> tuple:
         key1 = 'config.providers'
         if service_prop.get(key1) is None:
-            return 'all', {'kafka_connect_secret_registry_enabled': False}
+            return self.group, {'kafka_connect_secret_registry_enabled': False}
         key2 = 'config.providers.secret.param.master.encryption.key'
         key3 = 'config.providers.secret.param.kafkastore.topic.replication.factor'
         property_dict = dict()
@@ -219,7 +222,7 @@ class KafkaConnectServicePropertyBaseBuilder(AbstractPropertyBuilder):
         self.mapped_service_properties.add(key1)
         self.mapped_service_properties.add(key2)
         self.mapped_service_properties.add(key3)
-        return 'all', property_dict
+        return self.group, property_dict
 
     def _build_telemetry_properties(self, service_prop: dict) -> tuple:
         property_dict = self.build_telemetry_properties(service_prop)
@@ -228,7 +231,8 @@ class KafkaConnectServicePropertyBaseBuilder(AbstractPropertyBuilder):
     def _build_log4j_properties(self, service_properties: dict) -> tuple:
         log4j_file = self.get_log_file_path(self.input_context, self.service, self.hosts, "KAFKA_LOG4J_OPTS")
         default_log4j_file = "/etc/kafka/connect-log4j.properties"
-        root_logger, file = self.get_root_logger(self.input_context, self.service, self.hosts, log4j_file, default_log4j_file)
+        root_logger, file = self.get_root_logger(self.input_context, self.service, self.hosts, log4j_file,
+                                                 default_log4j_file)
 
         if root_logger is None or file is None:
             return "all", {'kafka_connect_custom_log4j': False}
@@ -237,6 +241,16 @@ class KafkaConnectServicePropertyBaseBuilder(AbstractPropertyBuilder):
             'log4j_file': file,
             'kafka_connect_log4j_root_logger': root_logger
         }
+
+    def _build_jmx_properties(self, service_properties: dict) -> tuple:
+        monitoring_details = self.get_monitoring_details(self.input_context, self.service, self.hosts, 'KAFKA_OPTS')
+        service_monitoring_details = dict()
+        group_name = self.service.value.get("group")
+
+        for key, value in monitoring_details.items():
+            service_monitoring_details[f"{group_name}_{key}"] = value
+
+        return group_name, service_monitoring_details
 
 
 class KafkaConnectServicePropertyBaseBuilder60(KafkaConnectServicePropertyBaseBuilder):
