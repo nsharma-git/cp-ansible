@@ -388,7 +388,8 @@ class KafkaServicePropertyBaseBuilder(AbstractPropertyBuilder):
         key4 = 'kafka.rest.kafka.rest.resource.extension.class'
         if service_prop.get(key4) is not None:
             metadata_user_info = service_prop.get('kafka.rest.confluent.metadata.basic.auth.user.info')
-            property_dict['mds_super_user_password'] = metadata_user_info.split(':')[1] #set to same as kafka_broker_ldap_password
+            property_dict['mds_super_user_password'] = metadata_user_info.split(':')[
+                1]  # set to same as kafka_broker_ldap_password
 
         return self.group, property_dict
 
@@ -436,8 +437,7 @@ class KafkaServicePropertyBaseBuilder(AbstractPropertyBuilder):
     def _build_log4j_properties(self, service_properties: dict) -> tuple:
         log4j_file = self.get_log_file_path(self.input_context, self.service, self.hosts, "KAFKA_LOG4J_OPTS")
         default_log4j_file = "/etc/kafka/log4j.properties"
-        root_logger, file = self.get_root_logger(self.input_context, self.service, self.hosts, log4j_file,
-                                                 default_log4j_file)
+        root_logger, file = self.get_root_logger(self.input_context, self.hosts, log4j_file, default_log4j_file)
 
         if root_logger is None or file is None:
             return "all", {'kafka_broker_custom_log4j': False}
