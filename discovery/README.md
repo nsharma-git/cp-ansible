@@ -3,9 +3,7 @@ Discovery is set of scripts that searches the Confluent Platform services and th
 Though this script tries to come up with inventory which is the closed representation of the given cluster, yet its advisable to run in lower environment and validate it manually.
 
 ### Prerequisites
-#### Software
 > Python 3.9+  
-> Ansible 2.11  
 > PyYaml 6.0  
 > ansible_runner
 

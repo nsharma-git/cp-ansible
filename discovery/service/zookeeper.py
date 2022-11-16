@@ -78,23 +78,15 @@ class ZookeeperServicePropertyBaseBuilder(AbstractPropertyBuilder):
 
         custom_group = "zookeeper_custom_properties"
         skip_properties = set(FileUtils.get_zookeeper_configs("skip_properties"))
-<<<<<<< HEAD
-        self.build_custom_properties(inventory=self.inventory,
-                                     group=group,
-                                     skip_properties=skip_properties,
-                                     mapped_properties=mapped_properties,
-                                     service_properties=service_properties)
-=======
-
         # Get host server properties dictionary
         _host_service_properties = dict()
         for host in host_service_properties.keys():
             _host_service_properties[host] = host_service_properties.get(host).get(DEFAULT_KEY)
+
         self.build_custom_properties(inventory=self.inventory, group=self.service.value.get('group'),
                                      custom_properties_group_name=custom_group,
                                      host_service_properties=_host_service_properties, skip_properties=skip_properties,
                                      mapped_properties=mapped_properties)
->>>>>>> 5378ad6d (Add secret protection support and enahanced customer properties)
 
     def __build_runtime_properties(self, hosts: list):
         # Build Java runtime overrides

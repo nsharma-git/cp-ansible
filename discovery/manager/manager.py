@@ -253,8 +253,8 @@ class ServicePropertyManager:
         if not keystorepath or not keystorepass:
             return []
 
-        runner_utils = AnsibleRunnerUtils('ansible_facts')
-        hosts, host_pattern = AnsibleRunnerUtils.get_host_and_pattern_from_input_context(input_context)
+        runner_utils = AnsibleRunnerUtils()
+        ansible_hosts, host_pattern = AnsibleRunnerUtils.get_host_and_pattern_from_input_context(input_context)
         ansible_runner.run(
             host_pattern=host_pattern,
             inventory=AnsibleRunnerUtils.get_inventory_dict(input_context),

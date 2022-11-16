@@ -77,7 +77,6 @@ class KafkaServicePropertyBaseBuilder(AbstractPropertyBuilder):
                 result = func(self, service_properties)
                 self.update_inventory(self.inventory, result)
 
-
     def __build_custom_properties(self, host_service_properties: dict, mapped_properties: set):
 
         custom_group = "kafka_broker_custom_properties"
@@ -295,9 +294,17 @@ class KafkaServicePropertyBaseBuilder(AbstractPropertyBuilder):
                 custom_listeners[name]['ssl_mutual_auth_enabled'] = True
 
             sasl_protocol = service_prop.get(key1)
-            if sasl_protocol is not None:
-                custom_listeners[name]['sasl_protocol']: sasl_protocol
+            if sasl_protocol is not None and sasl_protocol != 'GSSAPI':
+                custom_listeners[name]['sasl_protocol'] = sasl_protocol
                 # Add the users to corresponding sasl mechanism
+                key = f"listener.name.{name.lower()}.{sasl_protocol.lower()}.sasl.jaas.config"
+                _dict = locals()[f"default_{sasl_protocol.lower().replace('-', '_')}_users"]
+                _dict.update(self.__get_user_dict(service_prop, key))
+                self.mapped_service_properties.add(key)
+
+            if sasl_protocol is not None and sasl_protocol == 'GSSAPI':
+                # Setting for Kerberos properties
+                custom_listeners[name]['sasl_protocol'] = 'kerberos'
                 key = f"listener.name.{name.lower()}.{sasl_protocol.lower()}.sasl.jaas.config"
                 _dict = locals()[f"default_{sasl_protocol.lower().replace('-', '_')}_users"]
                 _dict.update(self.__get_user_dict(service_prop, key))
